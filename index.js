@@ -214,7 +214,7 @@ app.post('/send_email', (req, res) => {
       from: email,
       to: 'recipient@example.com',
       subject: 'New Message from ODERZIT Contact Form',
-      text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`
+      text: `<b>Name</b>: ${name}\<b>Email</b>: ${email}\<b>Message</b>: ${message}`
     };
   
   
