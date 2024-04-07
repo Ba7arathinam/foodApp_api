@@ -1,0 +1,19 @@
+{
+    "sqltools.connections": [
+        {
+            "mysqlOptions": {
+                "authProtocol": "xprotocol",
+                "enableSsl": "Disabled"
+            },
+            "previewLimit": 50,
+            "server": "3.7.198.191",
+            "port": 8993,
+            "driver": "MySQL",
+            "name": "api check",
+            "username": "bu-trausr",
+            "password": "r9*rwr$!usFw0MCPj#fJ",
+            "database": "bu-training",
+            "connectionTimeout": 20
+        }
+    ]
+}

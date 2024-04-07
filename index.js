@@ -4,6 +4,7 @@ const app=express()
 app.use(cors())
 app.use(express.json())
 var jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
 const mysql=require('mysql')
 const {makeDb}=require('mysql-async-simple')
 function sqlconnect(){
@@ -194,6 +195,40 @@ app.post('/verifyToken',(req,res)=>{
         res.json(err)
       }
 })
+
+//sending mail
+
+app.post('/send_email', (req, res) => {
+    const { name, email, message } = req.body;
+  
+    const transporter = nodemailer.createTransport({
+      service: 'Gmail',
+      auth: {
+        user: 'bala01225@gmail.com', 
+        pass: 'hxwcvysxejluinqy'
+      }
+    });
+  
+    
+    const mailOptions = {
+      from: email,
+      to: 'recipient@example.com',
+      subject: 'New Message from ODERZIT Contact Form',
+      text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`
+    };
+  
+  
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.log(error);
+        res.status(500).send('Error sending email');
+      } else {
+        console.log('Email sent: ' + info.response);
+        res.status(200).send('Email sent successfully');
+      }
+    });
+  });
+  
 
 app.listen(8080,()=>{
     console.log("Server is live now")
