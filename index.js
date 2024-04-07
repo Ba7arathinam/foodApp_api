@@ -7,6 +7,7 @@ var jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const mysql=require('mysql')
 const {makeDb}=require('mysql-async-simple')
+const { combinedMeals } = require('./datas')
 function sqlconnect(){
     return mysql.createConnection({
     host:'3.7.198.191',
@@ -17,6 +18,17 @@ function sqlconnect(){
 })
 }
 const db=makeDb()
+//get all data of food
+
+app.get('/api/meals', (req, res) => {
+    // const formattedMeals = combinedMeals.map(meal => ({
+    //     ...meal,
+    //     rating: ratings[combinedMeals.indexOf(meal)],
+    //     amount: amounts[combinedMeals.indexOf(meal)]
+    // }));
+    res.json({ meals: combinedMeals });
+});
+
 //generate JWT token for User & Password
 app.post('/loginAuth',async (req,res)=>{
     let emailss=req.body.email
