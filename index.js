@@ -1,12 +1,18 @@
 const express = require('express');
 const cors = require('cors');
+const crosConfig={
+    origin:"*",
+    Credential:true,
+    methods:["GET","POST","PUT","DELETE"]
+}
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const { Sequelize, DataTypes } = require('sequelize');
 const { combinedMeals } = require('./datas');
 const app = express();
-app.use(cors());
+app.use(cors(crosConfig));
 app.use(express.json());
+
 const sequelize = new Sequelize('bu-training', 'bu-trausr', 'r9*rwr$!usFw0MCPj#fJ', {
   host: '3.7.198.191',
   dialect: 'mysql',
