@@ -1,18 +1,13 @@
 const express = require('express');
 const cors = require('cors');
-const crosConfig={
-    origin:"*",
-    Credential:true,
-    methods:["GET","POST","PUT","DELETE"]
-}
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const { Sequelize, DataTypes } = require('sequelize');
 const { combinedMeals } = require('./datas');
+
 const app = express();
-app.use(cors(crosConfig));
-app.options("",cors(crosConfig))
 app.use(express.json());
+app.use(cors()); // Enable CORS for all routes
 
 const sequelize = new Sequelize('bu-training', 'bu-trausr', 'r9*rwr$!usFw0MCPj#fJ', {
   host: '3.7.198.191',
@@ -22,33 +17,24 @@ const sequelize = new Sequelize('bu-training', 'bu-trausr', 'r9*rwr$!usFw0MCPj#f
 
 // Define the User model
 const User = sequelize.define('User', {
-    email: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
-    },
-    password: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    token: {
-      type: DataTypes.STRING,
-    },
-    role: {
-      type: DataTypes.STRING,
-      defaultValue: 'user', // Setting default value to 'user'
-    },
-  });
-
-
-app.get('/api/meals', (req, res) => {
-    // const formattedMeals = combinedMeals.map(meal => ({
-    //     ...meal,
-    //     rating: ratings[combinedMeals.indexOf(meal)],
-    //     amount: amounts[combinedMeals.indexOf(meal)]
-    // }));
-    res.json({ meals: combinedMeals });
+  email: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+  },
+  password: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  token: {
+    type: DataTypes.STRING,
+  },
+  role: {
+    type: DataTypes.STRING,
+    defaultValue: 'user', // Default role is 'user'
+  },
 });
+
 // Define Sequelize connection sync and start the server
 (async () => {
   try {
@@ -62,23 +48,34 @@ app.get('/api/meals', (req, res) => {
     console.error('Unable to connect to the database:', error);
   }
 })();
+
+app.get('/api/meals', (req, res) => {
+    // const formattedMeals = combinedMeals.map(meal => ({
+    //     ...meal,
+    //     rating: ratings[combinedMeals.indexOf(meal)],
+    //     amount: amounts[combinedMeals.indexOf(meal)]
+    // }));
+    res.json({ meals: combinedMeals });
+});
+
+// Endpoint to insert 5 data entries into the User table
 app.post('/insertData', async (req, res) => {
-    try {
-     
-      await User.bulkCreate([
-        { email: 'user1@example.com', password: 'password1', role: 'user' },
-        { email: 'user2@example.com', password: 'password2', role: 'user' },
-        { email: 'user3@example.com', password: 'password3', role: 'user' },
-        { email: 'user4@example.com', password: 'password4', role: 'user' },
-        { email: 'user5@example.com', password: 'password5', role: 'user' },
-      ]);
-      
-      res.status(200).json({ message: 'Data inserted successfully' });
-    } catch (error) {
-      console.error('Error inserting data:', error);
-      res.status(500).json({ error: 'Error inserting data' });
-    }
-  });
+  try {
+    // Insert 5 data entries into the User table
+    await User.bulkCreate([
+      { email: 'user1@example.com', password: 'password1', role: 'user' },
+      { email: 'user2@example.com', password: 'password2', role: 'user' },
+      { email: 'user3@example.com', password: 'password3', role: 'user' },
+      { email: 'user4@example.com', password: 'password4', role: 'user' },
+      { email: 'user5@example.com', password: 'password5', role: 'user' },
+    ]);
+    
+    res.status(200).json({ message: 'Data inserted successfully' });
+  } catch (error) {
+    console.error('Error inserting data:', error);
+    res.status(500).json({ error: 'Error inserting data' });
+  }
+});
 
 // Login route with Sequelize
 app.post('/loginAuth', async (req, res) => {
@@ -91,25 +88,25 @@ app.post('/loginAuth', async (req, res) => {
     const token = jwt.sign({ email, password }, 'shhhshhsh', { expiresIn: '1d' });
     user.token = token;
     await user.save();
-    res.json({token:user.token ,id:user.id});
+    res.json({ token: user.token, id: user.id });
   } catch (error) {
     res.json(error);
   }
 });
+
 // Endpoint to create a new user
 app.post('/createUser', async (req, res) => {
-    const { email, password } = req.body;
-    try {
-      // Create a new user entry in the User table
-      const newUser = await User.create({ email, password });
-      
-      res.status(201).json({ message: 'User created successfully', user: newUser });
-    } catch (error) {
-      console.error('Error creating user:', error);
-      res.status(500).json({ error: 'Error creating user' });
-    }
-  });
-  
+  const { email, password } = req.body;
+  try {
+    // Create a new user entry in the User table
+    const newUser = await User.create({ email, password });
+    
+    res.status(201).json({ message: 'User created successfully', user: newUser });
+  } catch (error) {
+    console.error('Error creating user:', error);
+    res.status(500).json({ error: 'Error creating user' });
+  }
+});
 
 // Logout route with Sequelize
 app.get('/logOut/:id', async (req, res) => {
