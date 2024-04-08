@@ -3,6 +3,7 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const { Sequelize, DataTypes } = require('sequelize');
+const { combinedMeals } = require('./datas');
 
 const sequelize = new Sequelize('bu-training', 'bu-trausr', 'r9*rwr$!usFw0MCPj#fJ', {
   host: '3.7.198.191',
