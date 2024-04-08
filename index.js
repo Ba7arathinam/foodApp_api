@@ -83,7 +83,7 @@ app.post('/loginAuth', async (req, res) => {
     const token = jwt.sign({ email, password }, 'shhhshhsh', { expiresIn: '1d' });
     user.token = token;
     await user.save();
-    res.json({token:user.token });
+    res.json({token:user.token ,id:user.id});
   } catch (error) {
     res.json(error);
   }
