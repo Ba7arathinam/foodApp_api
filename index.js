@@ -11,6 +11,7 @@ const { Sequelize, DataTypes } = require('sequelize');
 const { combinedMeals } = require('./datas');
 const app = express();
 app.use(cors(crosConfig));
+app.options("",cors(crosConfig))
 app.use(express.json());
 
 const sequelize = new Sequelize('bu-training', 'bu-trausr', 'r9*rwr$!usFw0MCPj#fJ', {
