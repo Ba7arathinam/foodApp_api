@@ -1,25 +1,38 @@
-const express=require('express')
-const cors=require('cors')
-const app=express()
-app.use(cors())
-app.use(express.json())
-var jwt = require('jsonwebtoken');
+const express = require('express');
+const cors = require('cors');
+const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
-const mysql=require('mysql')
-const {makeDb}=require('mysql-async-simple')
-const { combinedMeals } = require('./datas')
-function sqlconnect(){
-    return mysql.createConnection({
-    host:'3.7.198.191',
-    user:'bu-trausr',
-    password:'r9*rwr$!usFw0MCPj#fJ',
-    database:'bu-training',
-    port:'8993'
-})
-}
-const db=makeDb()
-//get all data of food
+const { Sequelize, DataTypes } = require('sequelize');
 
+const sequelize = new Sequelize('bu-training', 'bu-trausr', 'r9*rwr$!usFw0MCPj#fJ', {
+  host: '3.7.198.191',
+  dialect: 'mysql',
+  port: 8993,
+});
+
+// Define the User model
+const User = sequelize.define('User', {
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
+    password: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    token: {
+      type: DataTypes.STRING,
+    },
+    role: {
+      type: DataTypes.STRING,
+      defaultValue: 'user', // Setting default value to 'user'
+    },
+  });
+
+const app = express();
+app.use(cors());
+app.use(express.json());
 app.get('/api/meals', (req, res) => {
     // const formattedMeals = combinedMeals.map(meal => ({
     //     ...meal,
@@ -28,220 +41,185 @@ app.get('/api/meals', (req, res) => {
     // }));
     res.json({ meals: combinedMeals });
 });
-
-//generate JWT token for User & Password
-app.post('/loginAuth',async (req,res)=>{
-    let emailss=req.body.email
-    let passwordd=req.body.password
-    var connection=sqlconnect()
-    await db.connect(connection);
-//    res.json({emailss,passwordd})
-    let uploadedFileName=await db.query(connection,`select email,password from LoginData where email='${emailss}' and password='${passwordd}'`)
-   try {
-    if(uploadedFileName.length==0){
-       throw "User Value Not available"
-    }else{
-        let tokens=jwt.sign({email:emailss,password:passwordd},'shhhshhsh',{expiresIn:'1d'})
-        let uploadedFileName1=await db.query(connection,`UPDATE LoginData
-        SET token = '${tokens}'
-        WHERE email = '${uploadedFileName[0].email}' and password='${uploadedFileName[0].password}';`)
-       if(uploadedFileName1){
-        res.json("Successs")
-       }
-    }
-   } catch (error) {
-    res.json(error)
-   }
-
-})
-
-//clear a token from database
-app.get('/logOut/:id',async (req,res)=>{
-    id=req.params.id
-    var connection=sqlconnect()
-    await db.connect(connection);
-    try {
-        let uploadedFileName1=await db.query(connection,`UPDATE LoginData
-        SET token = ''
-        WHERE id = '${id}'`)
-        if(uploadedFileName1){
-            res.json({message:"Token Removed"})
-        }else{
-            throw "Already LogOut"
-        }
-    } catch (error) {
-        res.json({message:error})
-    }
-})
-//function to check there role
-const RolebaseAuth = (role) => {
-    return async (req, res, next) => {
-        try {
-            var connection = sqlconnect(); 
-            await db.connect(connection);
-            var roleOfUser = await db.query(connection, `SELECT role FROM LoginData WHERE id = ${req.headers.id}`);
-            if (roleOfUser && roleOfUser.length > 0) {
-                if (role !== roleOfUser[0].role) {
-                 throw"Only Admin has Authorization"
-                } else {
-                    next();
-                }
-            } else {
-                res.status(404).send("User not found");
-            }
-        } catch (error) {
-            console.error("Error:", error);
-            res.status(500).json({error});
-        }
-    };
-};
-//get all user data
-app.get('/getAllUser',RolebaseAuth('admin'),async(req,res)=>{
-    var connection=sqlconnect()
-    await db.connect(connection);
-    try {
-        var uploadedFileName=await db.query(connection,`select * from LoginData`)
-        if(uploadedFileName){
-            req.json({Datas:uploadedFileName})
-        }else{
-            throw "ERROR DETECTED!"
-        }
-        
-    } catch (error) {
-        res.json({uploadedFileName})
-    }
-
-})
-//function to encript a get exact user data
-const GetDataOfUser = () => {
-    return async (req, res, next) => {
-        try {
-            var connection = sqlconnect(); 
-            await db.connect(connection);
-            let id=req.params.id
-            var roleOfUser = await db.query(connection, `SELECT id FROM LoginData WHERE id = ${req.headers.id}`);
-            console.log(roleOfUser[0].id)
-            if (roleOfUser && roleOfUser.length > 0) {
-                if (id == roleOfUser[0].id) {
-                    next();
-                 
-                } else {
-                    throw "UnAuthorization"
-                   
-                }
-            } else {
-                res.status(404).send("User not found");
-            }
-        } catch (error) {
-            console.error("Error:", error);
-            res.status(500).json({error});
-        }
-    };
-};
-//getDataById
-app.get('/getAllUser/:id',GetDataOfUser(),async(req,res)=>{
-    var connection=sqlconnect()
-    await db.connect(connection);
-    let id=req.params.id
-    try {
-        var uploadedFileName=await db.query(connection,`select * from LoginData where id=${id}`)
-        if(uploadedFileName){
-            req.json({Datas:uploadedFileName})
-        }else{
-            throw "ERROR DETECTED!"
-        }
-        
-    } catch (error) {
-        res.json({uploadedFileName})
-    }
-
-})
-//Update Password
-app.post('/UpdateData',async(req,res)=>{
-    let id=req.body.id
-    let existingPassword=req.body.existingPassword
-    let NewPassword=req.body.NewPassword
-    let confirmPassword=req.body.confirmPassword
-    var connection=sqlconnect()
-    await db.connect(connection);
-    var uploadedFileName=await db.query(connection,`select * from LoginData where id=${id}`)
-
-   if(existingPassword!==uploadedFileName[0].password){
-    res.status(400).send("Existing Password are not valid")
-   }else{
-    try {
-        if(uploadedFileName && uploadedFileName.length>0){
-            if(confirmPassword==NewPassword){
-                var setPassword=await db.query(connection,`UPDATE LoginData SET password = '${NewPassword}' WHERE id=${id};`)
-               if(setPassword){
-                res.json({message:"Updated SuccessFully"})
-               }
-            }else{
-                res.send("New Password are not same")
-            }
-        }else{
-            throw "Invalid Datas"
-        }
-        
-    } catch (e) {
-        res.json({e})
-    }
-   }
-})
-
-
-app.post('/verifyToken',(req,res)=>{
-    var token=req.body.token
-    // jwt.verify(token, 'shhhshhsh', function(err, decoded) {
-    //     if (err) {
-    //         res.json(err)
-    //     }else{
-    //         console.log(decoded)
-    //         res.json(decoded)
-    //     }
-    //   });
-      try {
-        var decoded = jwt.verify(token, 'shhhshhsh');
-         res.json(decoded)
-      } catch(err) {
-        res.json(err)
-      }
-})
-
-//sending mail
-
-app.post('/send_email', (req, res) => {
-    const { name, email, message } = req.body;
-  
-    const transporter = nodemailer.createTransport({
-      service: 'Gmail',
-      auth: {
-        user: 'bala01225@gmail.com', 
-        pass: 'hxwcvysxejluinqy'
-      }
+// Define Sequelize connection sync and start the server
+(async () => {
+  try {
+    await sequelize.authenticate();
+    console.log('Connection has been established successfully.');
+    await sequelize.sync(); // Sync all defined models to the DB
+    app.listen(9090, () => {
+      console.log('Server is live now');
     });
-  
-    
-    const mailOptions = {
-      from: email,
-      to: 'recipient@example.com',
-      subject: 'New Message from ODERZIT Contact Form',
-      text: `Name: ${name}\n Email: ${email}\n Message: ${message}`
-    };
-  
-  
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.log(error);
-        res.status(500).send('Error sending email');
-      } else {
-        console.log('Email sent: ' + info.response);
-        res.status(200).send('Email sent successfully');
-      }
-    });
+  } catch (error) {
+    console.error('Unable to connect to the database:', error);
+  }
+})();
+app.post('/insertData', async (req, res) => {
+    try {
+     
+      await User.bulkCreate([
+        { email: 'user1@example.com', password: 'password1', role: 'user' },
+        { email: 'user2@example.com', password: 'password2', role: 'user' },
+        { email: 'user3@example.com', password: 'password3', role: 'user' },
+        { email: 'user4@example.com', password: 'password4', role: 'user' },
+        { email: 'user5@example.com', password: 'password5', role: 'user' },
+      ]);
+      
+      res.status(200).json({ message: 'Data inserted successfully' });
+    } catch (error) {
+      console.error('Error inserting data:', error);
+      res.status(500).json({ error: 'Error inserting data' });
+    }
+  });
+
+// Login route with Sequelize
+app.post('/loginAuth', async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const user = await User.findOne({ where: { email, password } });
+    if (!user) {
+      throw "User Value Not available";
+    }
+    const token = jwt.sign({ email, password }, 'shhhshhsh', { expiresIn: '1d' });
+    user.token = token;
+    await user.save();
+    res.json({token:user.token });
+  } catch (error) {
+    res.json(error);
+  }
+});
+// Endpoint to create a new user
+app.post('/createUser', async (req, res) => {
+    const { email, password } = req.body;
+    try {
+      // Create a new user entry in the User table
+      const newUser = await User.create({ email, password });
+      
+      res.status(201).json({ message: 'User created successfully', user: newUser });
+    } catch (error) {
+      console.error('Error creating user:', error);
+      res.status(500).json({ error: 'Error creating user' });
+    }
   });
   
 
-app.listen(8080,()=>{
-    console.log("Server is live now")
-})
+// Logout route with Sequelize
+app.get('/logOut/:id', async (req, res) => {
+  const id = req.params.id;
+  try {
+    const user = await User.findByPk(id);
+    if (!user) {
+      throw "User not found";
+    }
+    user.token = null;
+    await user.save();
+    res.json({ message: "Token Removed" });
+  } catch (error) {
+    res.json({ message: error });
+  }
+});
+
+// Middleware to check user role
+const RolebaseAuth = (role) => {
+  return async (req, res, next) => {
+    const id = req.headers.id;
+    try {
+      const user = await User.findByPk(id);
+      if (!user) {
+        return res.status(404).send("User not found");
+      }
+      if (role !== user.role) {
+        throw "Only Admin has Authorization";
+      }
+      next();
+    } catch (error) {
+      console.error("Error:", error);
+      res.status(500).json({ error });
+    }
+  };
+};
+
+// Get all user data route with Sequelize
+app.get('/getAllUser', async (req, res) => {
+  try {
+    const users = await User.findAll();
+    res.json({ Datas: users });
+  } catch (error) {
+    res.json({ message: error });
+  }
+});
+
+// Get user data by ID route with Sequelize
+app.get('/getAllUser/:id', async (req, res) => {
+  const id = req.params.id;
+  try {
+    const user = await User.findByPk(id);
+    if (!user) {
+      throw "User not found";
+    }
+    res.json({ Datas: user });
+  } catch (error) {
+    res.json({ message: error });
+  }
+});
+
+// Update Password route with Sequelize
+app.post('/UpdateData', async (req, res) => {
+  const { id, existingPassword, NewPassword, confirmPassword } = req.body;
+  try {
+    const user = await User.findByPk(id);
+    if (!user) {
+      throw "Invalid Data";
+    }
+    if (existingPassword !== user.password) {
+      return res.status(400).send("Existing Password is not valid");
+    }
+    if (NewPassword !== confirmPassword) {
+      return res.send("New Passwords do not match");
+    }
+    user.password = NewPassword;
+    await user.save();
+    res.json({ message: "Updated Successfully" });
+  } catch (error) {
+    res.json({ message: error });
+  }
+});
+
+// Verify Token route
+app.post('/verifyToken', (req, res) => {
+  const token = req.body.token;
+  try {
+    const decoded = jwt.verify(token, 'shhhshhsh');
+    res.json(decoded);
+  } catch (err) {
+    res.json(err);
+  }
+});
+
+// Sending mail route
+app.post('/send_email', (req, res) => {
+  const { name, email, message } = req.body;
+  // Configure nodemailer transporter
+  const transporter = nodemailer.createTransport({
+    service: 'Gmail',
+    auth: {
+      user: 'bala01225@gmail.com',
+      pass: 'hxwcvysxejluinqy',
+    },
+  });
+  const mailOptions = {
+    from: email,
+    to: 'recipient@example.com',
+    subject: 'New Message from ODERZIT Contact Form',
+    text: `Name: ${name}\n Email: ${email}\n Message: ${message}`,
+  };
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.log(error);
+      res.status(500).send('Error sending email');
+    } else {
+      console.log('Email sent: ' + info.response);
+      res.status(200).send('Email sent successfully');
+    }
+  });
+});
