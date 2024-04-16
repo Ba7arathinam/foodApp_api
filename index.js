@@ -86,6 +86,66 @@ const Meal = sequelize.define('Meals', {
     }
   }
 });
+const Cart = sequelize.define('FoodApi_Carts', {
+  id: {
+    type: Sequelize.INTEGER,
+    allowNull: false,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  strMeal: {
+    type: Sequelize.STRING,
+    allowNull: false,
+    validate: {
+      notEmpty: { // Ensure strMeal is not empty
+        msg: 'Meal name is required'
+      }
+    }
+  },
+  strMealThumb: {
+    type: Sequelize.STRING,
+    allowNull: true
+  },
+  idMeal: {
+    type: Sequelize.INTEGER,
+    allowNull: false,
+    validate: {
+      isInt: { // Ensure idMeal is an integer
+        msg: 'idMeal must be a number'
+      }
+    }
+  },
+  rating: {
+    type: Sequelize.INTEGER,
+    allowNull: false,
+    validate: {
+      isInt: { // Ensure rating is an integer
+        msg: 'Rating must be a number'
+      },
+      min: 1, // Ensure rating is between 1 and 5
+      max: 5
+    }
+  },
+  amount: {
+    type: Sequelize.INTEGER,
+    allowNull: false,
+    validate: {
+      isInt: { // Ensure amount is an integer
+        msg: 'Amount must be a number'
+      }
+    }
+  },
+  quantity: {
+    type: Sequelize.INTEGER,
+    allowNull: false,
+    defaultValue:1,
+    validate: {
+      isInt: { // Ensure amount is an integer
+        msg: 'Amount must be a number'
+      }
+    }
+  }
+});
 
 // Define Sequelize connection sync and start the server
 (async () => {
@@ -322,6 +382,15 @@ app.get('/api/meals',async (req, res) => {
     // }));
    let meals= await Meal.findAll();
     res.json({ meals: meals });
+});
+app.get('/meals',async (req, res) => {
+    // const formattedMeals = combinedMeals.map(meal => ({
+    //     ...meal,
+    //     rating: ratings[combinedMeals.indexOf(meal)],
+    //     amount: amounts[combinedMeals.indexOf(meal)]
+    // }));
+   
+    res.json({ meals: combinedMeals });
 });
 
 // Endpoint to insert 5 data entries into the User table
