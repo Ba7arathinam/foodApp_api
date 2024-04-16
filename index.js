@@ -34,6 +34,58 @@ const User = sequelize.define('User', {
     defaultValue: 'user', // Default role is 'user'
   },
 });
+//mealsTable
+
+const Meal = sequelize.define('Meals', {
+  id: {
+    type: Sequelize.INTEGER,
+    allowNull: false,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  strMeal: {
+    type: Sequelize.STRING,
+    allowNull: false,
+    validate: {
+      notEmpty: { // Ensure strMeal is not empty
+        msg: 'Meal name is required'
+      }
+    }
+  },
+  strMealThumb: {
+    type: Sequelize.STRING,
+    allowNull: true
+  },
+  idMeal: {
+    type: Sequelize.INTEGER,
+    allowNull: false,
+    validate: {
+      isInt: { // Ensure idMeal is an integer
+        msg: 'idMeal must be a number'
+      }
+    }
+  },
+  rating: {
+    type: Sequelize.INTEGER,
+    allowNull: false,
+    validate: {
+      isInt: { // Ensure rating is an integer
+        msg: 'Rating must be a number'
+      },
+      min: 1, // Ensure rating is between 1 and 5
+      max: 5
+    }
+  },
+  amount: {
+    type: Sequelize.INTEGER,
+    allowNull: false,
+    validate: {
+      isInt: { // Ensure amount is an integer
+        msg: 'Amount must be a number'
+      }
+    }
+  }
+});
 
 // Define Sequelize connection sync and start the server
 (async () => {
@@ -48,34 +100,241 @@ const User = sequelize.define('User', {
     console.error('Unable to connect to the database:', error);
   }
 })();
+const dataaa = [
+  {
+    strMeal: "Baked salmon with fennel & tomatoes",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/1548772327.jpg",
+    idMeal: "52959",
+    rating: 4,
+    amount: 150
+},
+{
+    strMeal: "Cajun spiced fish tacos",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/uvuyxu1503067369.jpg",
+    idMeal: "52819",
+    rating: 3,
+    amount: 230
+},
+{
+    strMeal: "Escovitch Fish",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/1520084413.jpg",
+    idMeal: "52944",
+    rating: 5,
+    amount: 400
+},
+{
+    strMeal: "Fish fofos",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/a15wsa1614349126.jpg",
+    idMeal: "53043",
+    rating: 2,
+    amount: 720
+},
+{
+    strMeal: "Fish pie",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/ysxwuq1487323065.jpg",
+    idMeal: "52802",
+    rating: 4,
+    amount: 550
+},
+{
+    strMeal: "Fish Soup (Ukha)",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/7n8su21699013057.jpg",
+    idMeal: "53079",
+    rating: 3,
+    amount: 980
+},
+{
+    strMeal: "Fish Stew with Rouille",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/vptqpw1511798500.jpg",
+    idMeal: "52918",
+    rating: 5,
+    amount: 1200
+},
+{
+    strMeal: "Garides Saganaki",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/wuvryu1468232995.jpg",
+    idMeal: "52764",
+    rating: 2,
+    amount: 1650
+},
+{
+    strMeal: "Grilled Portuguese sardines",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/lpd4wy1614347943.jpg",
+    idMeal: "53041",
+    rating: 4,
+    amount: 1350
+},
+{
+    strMeal: "Honey Teriyaki Salmon",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/xxyupu1468262513.jpg",
+    idMeal: "52773",
+    rating: 3,
+    amount: 1775
+},
+{
+    strMeal: "Kedgeree",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/utxqpt1511639216.jpg",
+    idMeal: "52887",
+    rating: 5,
+    amount: 2000
+},
+{
+    strMeal: "Kung Po Prawns",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/1525873040.jpg",
+    idMeal: "52946",
+    rating: 2,
+    amount: 880
+},
+{
+    strMeal: "Laksa King Prawn Noodles",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/rvypwy1503069308.jpg",
+    idMeal: "52821",
+    rating: 4,
+    amount: 640
+},
+{
+    strMeal: "Mediterranean Pasta Salad",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/wvqpwt1468339226.jpg",
+    idMeal: "52777",
+    rating: 3,
+    amount: 1100
+},
+{
+    strMeal: "Mee goreng mamak",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/xquakq1619787532.jpg",
+    idMeal: "53048",
+    rating: 5,
+    amount: 1600
+},
+{
+    strMeal: "Nasi lemak",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/wai9bw1619788844.jpg",
+    idMeal: "53051",
+    rating: 2,
+    amount: 750
+},
+{
+    strMeal: "Portuguese fish stew (Caldeirada de peixe)",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/do7zps1614349775.jpg",
+    idMeal: "53045",
+    rating: 4,
+    amount: 800
+},
+{
+    strMeal: "Recheado Masala Fish",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/uwxusv1487344500.jpg",
+    idMeal: "52809",
+    rating: 3,
+    amount: 1250
+},
+{
+    strMeal: "Salmon Avocado Salad",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/1549542994.jpg",
+    idMeal: "52960",
+    rating: 5,
+    amount: 300
+},
+{
+    strMeal: "Salmon Prawn Risotto",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/xxrxux1503070723.jpg",
+    idMeal: "52823",
+    rating: 2,
+    amount: 175
+},
+{
+    strMeal: "Saltfish and Ackee",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/vytypy1511883765.jpg",
+    idMeal: "52936",
+    rating: 4,
+    amount: 800
+},
+{
+    strMeal: "Seafood fideuà",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/wqqvyq1511179730.jpg",
+    idMeal: "52836",
+    rating: 3,
+    amount: 400
+},
+{
+    strMeal: "Shrimp Chow Fun",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/1529445434.jpg",
+    idMeal: "52953",
+    rating: 5,
+    amount: 1900
+},
+{
+    strMeal: "Sledz w Oleju (Polish Herrings)",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/7ttta31593350374.jpg",
+    idMeal: "53023",
+    rating: 2,
+    amount: 170
+},
+{
+    strMeal: "Spring onion and prawn empanadas",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/1c5oso1614347493.jpg",
+    idMeal: "53040",
+    rating: 4,
+    amount: 1230
+},
+{
+    strMeal: "Sushi",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/g046bb1663960946.jpg",
+    idMeal: "53065",
+    rating: 3,
+    amount: 1500
+},
+{
+    strMeal: "Three Fish Pie",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/spswqs1511558697.jpg",
+    idMeal: "52882",
+    rating: 5,
+    amount: 300
+},
+{
+    strMeal: "Tuna and Egg Briks",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/2dsltq1560461468.jpg",
+    idMeal: "52975",
+    rating: 2,
+    amount: 560
+},
+{
+    strMeal: "Tuna Nicoise",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/yypwwq1511304979.jpg",
+    idMeal: "52852",
+    rating: 4,
+    amount: 900
+}
+];
 
-app.get('/api/meals', (req, res) => {
+//  Meal.bulkCreate(data)
+//   .then(() => {
+//     console.log('Data inserted successfully.');
+//   })
+//   .catch((error) => {
+//     console.error('Error inserting data:', error);
+//   });
+
+app.get('/api/meals',async (req, res) => {
     // const formattedMeals = combinedMeals.map(meal => ({
     //     ...meal,
     //     rating: ratings[combinedMeals.indexOf(meal)],
     //     amount: amounts[combinedMeals.indexOf(meal)]
     // }));
-    res.json({ meals: combinedMeals });
+   let meals= await Meal.findAll();
+    res.json({ meals: meals });
 });
 
 // Endpoint to insert 5 data entries into the User table
 app.post('/insertData', async (req, res) => {
   try {
-    // Insert 5 data entries into the User table
-    await User.bulkCreate([
-      { email: 'user1@example.com', password: 'password1', role: 'user' },
-      { email: 'user2@example.com', password: 'password2', role: 'user' },
-      { email: 'user3@example.com', password: 'password3', role: 'user' },
-      { email: 'user4@example.com', password: 'password4', role: 'user' },
-      { email: 'user5@example.com', password: 'password5', role: 'user' },
-    ]);
-    
+    await Meal.bulkCreate(dataaa);
     res.status(200).json({ message: 'Data inserted successfully' });
   } catch (error) {
     console.error('Error inserting data:', error);
     res.status(500).json({ error: 'Error inserting data' });
   }
 });
+
 
 // Login route with Sequelize
 app.post('/loginAuth', async (req, res) => {
